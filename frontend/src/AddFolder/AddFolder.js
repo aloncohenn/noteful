@@ -14,10 +14,27 @@ export default class AddFolder extends Component {
     validationMessages: null
   };
 
+  postFolderName(folderName) {
+    const url = 'http://localhost:8000/api/folders';
+    fetch(url, {
+      method: 'post',
+      headers: {
+        Accept: 'application/json, text/plain, */*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name: folderName })
+    })
+      .then(res => res.json())
+      .then(() => {
+        this.context.addFolder();
+        this.props.history.push(`/`);
+      });
+  }
+
   handleSubmit(event, folderName) {
     event.preventDefault();
     console.log('handle submit ran');
-    this.context.addFolder(folderName);
+    this.postFolderName(folderName);
   }
 
   validateFolderName(name) {
@@ -53,7 +70,7 @@ export default class AddFolder extends Component {
   }
 
   updateFolderName(name) {
-    this.setState({ name }, () => this.validateFolderName(name));
+    this.setState({ name }, () => this.validateFolderName(name))
   }
 
   render() {
@@ -79,7 +96,7 @@ export default class AddFolder extends Component {
               />
             </div>
             <div className="buttons">
-              <button type="submit" disabled={!this.stat.folderNameValid}>
+              <button type="submit" disabled={!this.state.folderNameValid}>
                 Add folder
               </button>
             </div>

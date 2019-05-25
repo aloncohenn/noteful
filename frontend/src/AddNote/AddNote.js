@@ -18,7 +18,7 @@ export default class AddNote extends Component {
       noteValid: false,
       noteContent: '',
       contentValid: false,
-      noteFolder: 'b0715efe-ffaf-11e8-8eb2-f2801f1b9fd1',
+      noteFolder: '1',
       validationErrors: {
         noteName: '',
         noteContent: ''
@@ -27,8 +27,24 @@ export default class AddNote extends Component {
   }
   handleSubmit(event, noteName, noteContent, folderId) {
     event.preventDefault();
-    console.log('handle submit ran');
-    this.context.addNote(event, noteName, noteContent, folderId);
+    const url = 'http://localhost:8000/api/notes';
+    fetch(url, {
+      method: 'post',
+      headers: {
+        Accept: 'application/json, text/plain, */*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: noteName,
+        content: noteContent,
+        folder_id: folderId
+      })
+    })
+      .then(res => res.json())
+      .then(() => {
+        this.context.addNote()
+        this.props.history.push(`/`)
+      })
   }
 
   validateName(name) {

@@ -1,24 +1,28 @@
 import React from 'react';
 import Note from '../Note/Note';
 import './NotePageMain.css';
+import AppContext from '../AppContext'
 
-export default function NotePageMain(props) {
-  console.log('note from notepagemain', props.note);
-  return (
-    <section className="NotePageMain">
-      <Note
-        id={props.note.note_id}
-        name={props.note.name}
-        modified={props.note.modified}
-        content={props.note.content}
-      />
-      <div className="NotePageMain__content">{props.note.content}</div>
+class NotePageMain extends React.Component {
+  static contextType = AppContext
+
+  render() {
+    const note = this.context.notes.find(
+      note => note.note_id === Number(this.props.match.params.note_id)
+    );
+    
+    return (
+      <section className="NotePageMain">
+        <Note
+          id={note.note_id}
+          name={note.name}
+          modified={note.modified}
+          content={note.content}
+        />
+        <div className="NotePageMain__content">{note.content}</div>
     </section>
-  );
+    );
+  }
 }
 
-NotePageMain.defaultProps = {
-  note: {
-    content: ''
-  }
-};
+export default NotePageMain
