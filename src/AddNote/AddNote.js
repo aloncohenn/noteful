@@ -128,7 +128,7 @@ export default class AddNote extends Component {
                 onChange={e => this.updateFolder(e.target.value)}
               >
                 {this.context.folders.map(folder => (
-                  <option key={folder.id} value={folder.id}>
+                  <option key={folder.folder_id} value={folder.folder_id}>
                     {folder.name}
                   </option>
                 ))}
