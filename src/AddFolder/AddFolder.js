@@ -15,7 +15,7 @@ export default class AddFolder extends Component {
   };
 
   postFolderName(folderName) {
-    const url = 'https://noteful-client-1.herokuapp.com/api/notes/';
+    const url = 'https://noteful-client-1.herokuapp.com/api/folders/';
     fetch(url, {
       method: 'post',
       headers: {
