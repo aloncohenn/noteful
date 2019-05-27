@@ -17,7 +17,7 @@ export default function Note(props) {
             <button
               className="Note__delete"
               type="button"
-              onClick={note_id => context.deleteNote(props.note_id)}
+              onClick={() => context.deleteNote(props.id)}
             >
               <FontAwesomeIcon icon="trash-alt" /> remove
             </button>

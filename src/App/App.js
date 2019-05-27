@@ -19,11 +19,12 @@ import './App.css';
 class App extends Component {
   state = {
     notes: [],
-    folders: []
+    folders: [],
+    isLoaded: false
   };
 
-  componentDidMount() {
-    fetch('http://localhost:8000/api/folders')
+  fetchFolders = () => {
+    fetch('https://noteful-client-1.herokuapp.com/api/folders')
       .then(res => res.json())
       .then(resJson =>
         this.setState({
@@ -31,8 +32,10 @@ class App extends Component {
         })
       )
       .catch(error => console.log(error));
+  }
 
-    fetch('http://localhost:8000/api/notes')
+  fetchNotes = () => {
+    fetch('https://noteful-client-1.herokuapp.com/api/notes')
       .then(res => res.json())
       .then(resJson =>
         this.setState({
@@ -42,42 +45,18 @@ class App extends Component {
       .catch(error => console.log(error));
   }
 
-  postFolderName(folderName) {
-    const url = 'http://localhost:8000/api/folders';
-    fetch(url, {
-      method: 'post',
-      headers: {
-        Accept: 'application/json, text/plain, */*',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ name: folderName })
-    })
-      .then(res => res.json())
-      .then(res => console.log(res));
-  }
-
-  addNote(event, noteName, noteContent, folderId) {
-    console.log('noteName', noteName);
-    const url = 'http://localhost:8000/api/notes';
-    fetch(url, {
-      method: 'post',
-      headers: {
-        Accept: 'application/json, text/plain, */*',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: noteName,
-        content: noteContent,
-        folderId: folderId
+  componentDidMount() {
+    Promise.all([
+      this.fetchFolders(),
+      this.fetchNotes(),
+      this.setState({
+        isLoaded: true
       })
-    })
-      .then(res => res.json())
-      .then(res => console.log(res));
+    ])
   }
 
   renderNavRoutes() {
     const { notes, folders } = this.state;
-    console.log('renderNaveRoutes', this.state);
     return (
       <>
         {['/', '/folder/:folder_id'].map(path => (
@@ -86,7 +65,6 @@ class App extends Component {
         <Route
           path="/note/:note_id"
           render={routeProps => {
-            console.log(routeProps);
             const { note_id } = routeProps.match.params;
             const note = findNote(notes, note_id) || {};
             const folder = findFolder(folders, note.folder_id);
@@ -101,7 +79,6 @@ class App extends Component {
 
   renderMainRoutes() {
     const { notes } = this.state;
-    console.log('rendermainroutes', this.state);
     return (
       <>
         {['/', '/folder/:folder_id'].map(path => (
@@ -111,7 +88,6 @@ class App extends Component {
             path={path}
             render={routeProps => {
               const { folder_id } = routeProps.match.params;
-              console.log('routeprops', routeProps.match.params);
               const notesForFolder = getNotesForFolder(notes, folder_id);
               return <NoteListMain {...routeProps} notes={notesForFolder} />;
             }}
@@ -121,8 +97,9 @@ class App extends Component {
           path="/note/:note_id"
           render={routeProps => {
             const { note_id } = routeProps.match.params;
-            const note = findNote(notes, note_id);
-            return <NotePageMain {...routeProps} note={note} />;
+            const note = findNote(notes, note_id) || {};
+            console.log('findNote', note);
+            return <NotePageMain {...routeProps} />;
           }}
         />
         <Route path="/add-folder" component={AddFolder} />
@@ -132,12 +109,17 @@ class App extends Component {
   }
 
   handleDeleteNote = id => {
-    let newNotes = this.state.notes.filter(note => {
-      return note.id !== id;
-    });
-    this.setState({
-      notes: newNotes
-    });
+    const url = `https://noteful-client-1.herokuapp.com/api/notes/${id}`
+    fetch(url, {
+      method: 'delete',
+      headers: {
+        Accept: 'application/json, text/plain, */*',
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => {
+      this.fetchNotes();
+    })
   };
 
   render() {
@@ -145,8 +127,8 @@ class App extends Component {
       folders: this.state.folders,
       notes: this.state.notes,
       deleteNote: this.handleDeleteNote,
-      addFolder: this.postFolderName,
-      addNote: this.addNote
+      addFolder: this.fetchFolders,
+      addNote: this.fetchNotes
     };
 
     return (
